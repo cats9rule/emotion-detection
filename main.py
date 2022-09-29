@@ -1,5 +1,5 @@
-from locale import normalize
 import pandas as pd
+import random
 from keras.models import load_model
 
 import preprocessing as pp
@@ -19,6 +19,12 @@ def resolve_emotion(index):
     if index == 5:
         return "surprise"
     return ""
+
+def generateQuote(emotion: str):
+    with open(f'quotes/{emotion}.txt', 'r', encoding='utf8') as file:
+        quotes = file.readlines()
+        index = random.randint(0, len(quotes)-1)
+        return quotes[index].replace('\n', '')
 
 
 def main():
@@ -44,6 +50,9 @@ def main():
                 emotion = resolve_emotion(index)
 
         print("\n> Sentence: " + text + "\n  > Predicted: " + emotion)
+
+        print(f'\n {generateQuote(emotion)}')
+
 
 
 
