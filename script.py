@@ -45,11 +45,11 @@ def cleaning(text):
     text = re.sub(r"\'ve", " have", text)
     text = re.sub(r"won't", "will not", text)
     text = re.sub(r"don't", "do not", text)
-    text = re.sub(r"did't", "did not", text)
+    text = re.sub(r"didn't", "did not", text)
     text = re.sub(r"can't", "can not", text)
     text = re.sub(r"it's", "it is", text)
     text = re.sub(r"couldn't", "could not", text)
-    text = re.sub(r"have't", "have not", text)
+    text = re.sub(r"haven't", "have not", text)
 
     text = re.sub(r"[,.\"!@#$%^&*(){}?/;`~:<>+=-]", "", text)
     tokens = word_tokenize(text)
@@ -167,7 +167,7 @@ model = load_model('emotions.h5')
 
 while True:
     topredict = list()
-    print("\n\n  > Please enter a sentence: ")
+    print("\n\n> Please enter a sentence: ")
     text = input()
     text = cleaning(text)
     topredict.append(text)
@@ -184,4 +184,4 @@ while True:
             max = value
             emotion = resolve_emotion(index)
 
-    print("\n  > Sentence: " + text + "\n  > Predicted: " + emotion)
+    print("\n> Sentence: " + text + "\n  > Predicted: " + emotion)

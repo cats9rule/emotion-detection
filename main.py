@@ -1,0 +1,52 @@
+from locale import normalize
+import pandas as pd
+from keras.models import load_model
+
+import preprocessing as pp
+import train
+
+def resolve_emotion(index):
+    if index == 0:
+        return "joy"
+    if index == 1:
+        return "anger"
+    if index == 2:
+        return "love"
+    if index == 3:
+        return "sadness"
+    if index == 4:
+        return "fear"
+    if index == 5:
+        return "surprise"
+    return ""
+
+
+def main():
+    try:
+        model = load_model('model\emotions.h5')
+    except IOError:
+        print("Model unavailable. Making the model...")
+        train.makeModel()
+    
+    while True:
+        topredict = list()
+        print("\n\n> Please enter a sentence: ")
+        text = input()
+        text = pp.normalizeText(text)
+        topredict.append(text)
+        topredict = pp.textToSequences(topredict)
+        result = model.predict(topredict, 1, 0)
+        emotion = ""
+        max = 0
+        for index, value in enumerate(result[0]):
+            if value > max:
+                max = value
+                emotion = resolve_emotion(index)
+
+        print("\n> Sentence: " + text + "\n  > Predicted: " + emotion)
+
+
+
+
+if __name__ == "__main__":
+    main()
