@@ -1,8 +1,6 @@
 import re
 import io
 import json
-from tokenize import Token
-from types import NoneType
 import string
 import nltk
 from nltk.tokenize import word_tokenize
@@ -11,15 +9,22 @@ from keras.preprocessing.text import Tokenizer, tokenizer_from_json
 from keras_preprocessing.sequence import pad_sequences
 
 
-def normalizeText(text: str) -> str:
+def _normalizeText(text: str) -> str:
     text = text.lower()
+    text = _cleanLinks(_cleanAbbreviations(text))
+    text = _removeSpecialChars(text)
+    text = _removePunctuation(text)
+    return text
+
+def _cleanLinks(text):
     pattern = re.compile(
         'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
     clean = re.compile('<.*?>')
-
-    # cleaning links and abbreviations
     text = re.sub(clean, '', text)
     text = pattern.sub('', text)
+    return text
+
+def _cleanAbbreviations(text):
     text = re.sub(r"i['\s]?m\s", "i am ", text)
     text = re.sub(r"you're", "you are", text)
     text = re.sub(r"\su['\s]r\s", " you are ", text)
@@ -41,11 +46,13 @@ def normalizeText(text: str) -> str:
     text = re.sub(r"haven['\s]?t", "have not", text)
     text = re.sub(r"\sw(?:\s|$)", " with ", text)
     text = re.sub(r"\stbh\s", " to be honest ", text)
+    return text
 
-    # removing special characters
+def _removeSpecialChars(text):
     text = re.sub(r"[,.\"!@#$%^&*(){}?/;`~:<>+=-]", "", text)
+    return text
 
-    # removing punctuation
+def _removePunctuation(text):
     tokens = word_tokenize(text)
     table = str.maketrans('', '', string.punctuation)
     stripped = [w.translate(table) for w in tokens]
@@ -57,7 +64,7 @@ def preprocess(inputData: dict) -> tuple:
     inputData['sentiment'] = inputData['sentiment'].replace(
     {'joy': 0, 'anger': 1, 'love': 2, 'sadness': 3, 'fear': 4, 'surprise': 5})
     yinput = to_categorical(inputData['sentiment'].values)
-    inputData['text'] = inputData['text'].map(normalizeText)
+    inputData['text'] = inputData['text'].map(_normalizeText)
     xinput = inputData['text'].values
     return (xinput, yinput)
 

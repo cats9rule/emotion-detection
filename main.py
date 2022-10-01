@@ -1,6 +1,6 @@
-import pandas as pd
 import random
 from keras.models import load_model
+from keras.utils import plot_model
 
 import preprocessing as pp
 import train
@@ -32,7 +32,8 @@ def main():
         model = load_model('model\emotions.h5')
     except IOError:
         print("Model unavailable. Making the model...")
-        train.makeModel()
+        model = train.trainModel()
+        plot_model(model=model, to_file='model\model.png', show_layer_names=False, show_shapes=True, show_layer_activations=True)
     
     while True:
         topredict = list()
@@ -50,10 +51,7 @@ def main():
                 emotion = resolve_emotion(index)
 
         print("\n> Sentence: " + text + "\n  > Predicted: " + emotion)
-
         print(f'\n {generateQuote(emotion)}')
-
-
 
 
 
