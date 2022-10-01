@@ -31,7 +31,7 @@ def main():
     try:
         model = load_model('model\emotions.h5')
     except IOError:
-        print("Model unavailable. Making the model...")
+        print("Model unavailable on disk. Making the model...")
         model = train.trainModel()
         plot_model(model=model, to_file='model\model.png', show_layer_names=False, show_shapes=True, show_layer_activations=True)
     
@@ -39,7 +39,7 @@ def main():
         topredict = list()
         print("\n\n> Please enter a sentence: ")
         text = input()
-        text = pp.normalizeText(text)
+        text = pp._normalizeText(text)
         topredict.append(text)
         topredict = pp.textToSequences(topredict)
         result = model.predict(topredict, 1, 0)

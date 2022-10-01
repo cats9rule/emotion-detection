@@ -11,7 +11,7 @@ from keras_preprocessing.sequence import pad_sequences
 
 def _normalizeText(text: str) -> str:
     text = text.lower()
-    text = _cleanLinks(_cleanAbbreviations(text))
+    text = _cleanAbbreviations(_cleanLinks(text))
     text = _removeSpecialChars(text)
     text = _removePunctuation(text)
     return text
@@ -49,7 +49,7 @@ def _cleanAbbreviations(text):
     return text
 
 def _removeSpecialChars(text):
-    text = re.sub(r"[,.\"!@#$%^&*(){}?/;`~:<>+=-]", "", text)
+    text = re.sub(r"[@#$%^&*(){}/;`~<>+=-]", "", text)
     return text
 
 def _removePunctuation(text):
@@ -69,7 +69,7 @@ def preprocess(inputData: dict) -> tuple:
     return (xinput, yinput)
 
 def makeTokenizer(xtrain: list):
-    tokenizer = Tokenizer(15212, lower=True, oov_token='UNK')
+    tokenizer = Tokenizer(15212, oov_token='UNK')
     tokenizer.fit_on_texts(xtrain)
     tokenizer_json = tokenizer.to_json()
     with io.open('preprocessing/tokenizer.json', 'w', encoding='utf-8') as f:
