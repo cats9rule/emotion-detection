@@ -1,10 +1,11 @@
 import preprocessing as pp
 
 import pandas as pd
+import io
 from keras.models import Sequential
 from keras.layers import Dense, Embedding, LSTM, Bidirectional, Dropout
-#from keras.metrics import Recall, Accuracy
-from sklearn.metrics import confusion_matrix
+from keras.utils import plot_model
+from sklearn.metrics import confusion_matrix, classification_report
 import matplotlib.pyplot as plt
 import seaborn as sn
 import numpy as np
@@ -32,16 +33,17 @@ def trainModel():
 
     _testModel(model, xtest, ytest)
     _saveFigures(hist)
+    plot_model(model=model, to_file='model\model.png', show_layer_names=False, show_shapes=True, show_layer_activations=True)
 
     return model
 
 def _makeModel():
     model = Sequential()
-    model.add(Embedding(15212, 64, input_length=80))
+    model.add(Embedding(input_dim=15212, output_dim=64, input_length=80))
     model.add(Dropout(0.5))
     model.add(Bidirectional(LSTM(64, return_sequences=True)))
-    model.add(Dropout(0.3))
     model.add(Bidirectional(LSTM(128)))
+    model.add(Dropout(0.3))
     model.add(Dense(128, activation="relu"))
     model.add(Dense(6, activation="softmax"))
     model.compile(optimizer='adam', loss='categorical_crossentropy',
@@ -50,9 +52,13 @@ def _makeModel():
     return model
 
 def _testModel(model, xtest, ytest):
-    print("Testing the model....")
+    print("Testing the model...")
     print("The result obtained is:\n")
+    test = pd.read_csv('data/test.txt', sep=';', names=['text', 'sentiment'])
+    xtest, ytest = pp.preprocess(test)
+    xtest = pp.textToSequences(xtest)
     model.evaluate(xtest, ytest)
+
 
     yprediction = model.predict(xtest)
     yprediction = np.argmax(yprediction, axis=1)
@@ -60,12 +66,28 @@ def _testModel(model, xtest, ytest):
     result = confusion_matrix(ytest, yprediction, normalize='pred')
     print(result)
 
-    classes = ["joy", "sadness", "anger", "fear", "surprise", "love"]
+    classes = ["joy", "anger", "love", "sadness", "fear", "surprise"]
     df_cfm = pd.DataFrame(result, index = classes, columns = classes)
     plt.figure(figsize = (10,7))
     cfm_plot = sn.heatmap(df_cfm, annot=True)
     cfm_plot.figure.savefig("evaluation\cfm.png")
     print("\nConfusion matrix saved on disk.\n")
+
+    getClassificationReport(model)
+
+
+def getClassificationReport(model):
+    test = pd.read_csv('data/test.txt', sep=';', names=['text', 'sentiment'])
+    xtest, ytest = pp.preprocess(test)
+    xtest = pp.textToSequences(xtest)
+    yprediction = model.predict(xtest)
+    yprediction = np.argmax(yprediction, axis=1)
+    ytest = np.argmax(ytest, axis=1)
+    report = classification_report(ytest, yprediction)
+    print(report)
+    with io.open('evaluation/classificationreport.txt', 'w', encoding='utf-8') as f:
+        f.write(report)
+
 
 def _saveFigures(hist):
     plt.figure(figsize=(15, 10))

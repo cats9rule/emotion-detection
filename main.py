@@ -1,6 +1,5 @@
 import random
 from keras.models import load_model
-from keras.utils import plot_model
 
 import preprocessing as pp
 import train
@@ -32,9 +31,8 @@ def main():
         model = load_model('model\emotions.h5')
     except IOError:
         print("Model unavailable on disk. Making the model...")
-        model = train.trainModel()
-        plot_model(model=model, to_file='model\model.png', show_layer_names=False, show_shapes=True, show_layer_activations=True)
-    
+        model = train.trainModel()   
+
     while True:
         topredict = list()
         print("\n\n> Please enter a sentence: ")
@@ -42,9 +40,10 @@ def main():
         text = pp._normalizeText(text)
         topredict.append(text)
         topredict = pp.textToSequences(topredict)
-        result = model.predict(topredict, 1, 0)
+        result = model.predict(topredict)
         emotion = ""
         max = 0
+        print(result)
         for index, value in enumerate(result[0]):
             if value > max:
                 max = value
