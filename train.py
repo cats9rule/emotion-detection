@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sn
 import numpy as np
 
-from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
 
 
 def trainModel():
@@ -58,7 +58,7 @@ def _makeModel():
     # model.build((None, 80, 100))
     # print(model.summary())
 
-    model = GaussianNB()
+    model = RandomForestClassifier(random_state=0, criterion="entropy") 
 
 
     return model
@@ -82,7 +82,7 @@ def _testModel(model, xtest, ytest):
     df_cfm = pd.DataFrame(result, index = classes, columns = classes)
     plt.figure(figsize = (10,7))
     cfm_plot = sn.heatmap(df_cfm, annot=True)
-    cfm_plot.figure.savefig("evaluation\cfm-nb.png")
+    cfm_plot.figure.savefig("evaluation\cfm-rf.png")
     print("\nConfusion matrix saved on disk.\n")
 
     getClassificationReport(model)
@@ -97,7 +97,7 @@ def getClassificationReport(model):
     #ytest = np.argmax(ytest, axis=1)
     report = classification_report(ytest, yprediction)
     print(report)
-    with io.open('evaluation/classificationreport-nb.txt', 'w', encoding='utf-8') as f:
+    with io.open('evaluation/classificationreport-rf.txt', 'w', encoding='utf-8') as f:
         f.write(report)
 
 
@@ -109,7 +109,7 @@ def _saveFigures(hist):
     plt.xlabel("EPOCHS")
     plt.ylabel("ACCURACY")
     plt.legend(loc='lower right')
-    plt.savefig('evaluation/accuracy-nb.jpg')
+    plt.savefig('evaluation/accuracy-rf.jpg')
 
     plt.figure(figsize=(15, 10))
     plt.plot(hist.history['loss'], c='orange', label='train')
@@ -118,11 +118,11 @@ def _saveFigures(hist):
     plt.xlabel("EPOCHS")
     plt.ylabel("LOSS")
     plt.legend(loc='upper right')
-    plt.savefig('evaluation\loss-nb.jpg')
+    plt.savefig('evaluation\loss-rf.jpg')
 
 def _saveClassDistribution(dataset):
     plt.figure(figsize=(15, 10))
     pie = dataset.sentiment.value_counts().plot(kind='pie', autopct='%1.0f%%')
     pie.figure.set_size_inches(15, 10)
     pie.figure.legend(loc='lower right')
-    pie.figure.savefig("evaluation/classdistribution-nb.jpg")
+    pie.figure.savefig("evaluation/classdistribution-rf.jpg")
