@@ -28,7 +28,7 @@ def generateQuote(emotion: str):
 
 def main():
     try:
-        model = load_model('model\emotions.h5')
+        model = load_model('model\emotions-wv.h5')
     except IOError:
         print("Model unavailable on disk. Making the model...")
         model = train.trainModel()   
@@ -39,7 +39,7 @@ def main():
         text = input()
         text = pp._normalizeText(text)
         topredict.append(text)
-        topredict = pp.textToSequences(topredict)
+        topredict = pp.text_to_embedding(topredict)
         result = model.predict(topredict)
         emotion = ""
         max = 0

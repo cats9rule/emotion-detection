@@ -2,12 +2,17 @@ import re
 import io
 import json
 import string
+import numpy as np
 import nltk
 from nltk.tokenize import word_tokenize
 from keras.utils import to_categorical
 from keras.preprocessing.text import Tokenizer, tokenizer_from_json
 from keras_preprocessing.sequence import pad_sequences
+import gensim.downloader
+from gensim.models import Word2Vec, KeyedVectors
+from os import path
 
+model = None
 
 def _normalizeText(text: str) -> str:
     text = text.lower()
@@ -83,3 +88,54 @@ def textToSequences(text: list):
         tokenizer = tokenizer_from_json(data)
         text = pad_sequences(tokenizer.texts_to_sequences(text), maxlen=80, padding='post')
         return text
+
+########### WORD2VEC ############
+
+def make_word_embedding(xtrain: list):
+    if not path.exists('preprocessing/modelpath.txt'):
+        model_path = gensim.downloader.load('glove-twitter-100', return_path=True) #Word2Vec(sentences=xtrain, vector_size=128, window=5, min_count=1, workers=10)
+        print(model_path)
+        with io.open('preprocessing/modelpath.txt', 'w', encoding='utf-8') as f:
+            f.write(model_path)
+    return
+
+def text_to_embedding(text: list):
+    global model
+    if model is None:
+        model_path = ''
+        with open('preprocessing/modelpath.txt') as f:
+            model_path = f.read()
+        model = gensim.models.KeyedVectors.load_word2vec_format(model_path)
+    
+    words = set(model.index_to_key)
+    #print("\n\nVector: " + str(model['angry']) + "\n\n\n")
+
+    tokenized_text = []
+
+    for sentence in text:
+        tokenized_sentence = [model[i] for i in sentence if i in words]
+        word_count = len(tokenized_sentence)
+        if word_count > 80:
+            tokenized_sentence = tokenized_sentence[:80]
+        elif word_count < 80:
+            tokenized_sentence.extend([[0.0] * 100] * (80 - word_count))
+        tokenized_sentence = np.array(tokenized_sentence)
+        #print(tokenized_sentence.shape)
+        tokenized_text.append(tokenized_sentence)
+    tokenized_text = np.array(tokenized_text)
+    
+    # tokenized_text = np.array([np.array(val) for val in tokenized_text])
+    print("\n\n" + str(tokenized_text.shape))
+    return tokenized_text
+
+
+    # embed_list = list()
+    # for sentence in text:
+    #     embed_sentence = list()
+    #     for word in sentence:
+    #         embed_sentence.append(model.wv[word])
+    #     embed_list.append(pad_sequences(embed_sentence, maxlen=80, padding='post'))
+    
+    # print("\n\n" + str(len(embed_sentence)) + "\n\n")
+    # return embed_list
+    #return pad_sequences(embed_list, maxlen=80, padding='post')

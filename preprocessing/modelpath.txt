@@ -1,0 +1,1 @@
+C:\Users\Nevena/gensim-data\glove-twitter-100\glove-twitter-100.gz
