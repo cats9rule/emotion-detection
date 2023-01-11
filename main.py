@@ -28,7 +28,7 @@ def generateQuote(emotion: str):
 
 def main():
     try:
-        model = load_model('model\emotions-wv.h5')
+        model = load_model('model\emotions-wvnb.h5')
     except IOError:
         print("Model unavailable on disk. Making the model...")
         model = train.trainModel()   

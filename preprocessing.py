@@ -68,7 +68,7 @@ def _removePunctuation(text):
 def preprocess(inputData: dict) -> tuple:
     inputData['sentiment'] = inputData['sentiment'].replace(
     {'joy': 0, 'anger': 1, 'love': 2, 'sadness': 3, 'fear': 4, 'surprise': 5})
-    yinput = to_categorical(inputData['sentiment'].values)
+    yinput = inputData['sentiment'].values
     inputData['text'] = inputData['text'].map(_normalizeText)
     xinput = inputData['text'].values
     return (xinput, yinput)
@@ -126,6 +126,9 @@ def text_to_embedding(text: list):
     
     # tokenized_text = np.array([np.array(val) for val in tokenized_text])
     print("\n\n" + str(tokenized_text.shape))
+    #tokenized_text = tokenized_text.transpose(2,0,1).reshape(3,-1)
+    #tokenized_text = tokenized_text.transpose((2, 0, 1))
+    tokenized_text = tokenized_text.reshape(tokenized_text.shape[0], (tokenized_text.shape[1]*tokenized_text.shape[2]))
     return tokenized_text
 
 
